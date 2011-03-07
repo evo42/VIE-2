@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<project name="VIE^2" basedir="." default="all">
+    
+	<property name="VERSION" value="0.1"/>
+	    
+    <property name="DOCS_DIR" value="./docs" description="API documentation"/>
+    <property name="DIST_DIR" value="./dist"/>
+    <property name="LIB_DIR" value="./lib"/>
+    <property name="SRC_DIR" value="./src"/>
+    <property name="TOOLS_DIR" value="./utils"/>
+    <property name="JSDOC_TOOLKIT_DIR" value="${TOOLS_DIR}/jsdoc-toolkit/"/>
+    <property name="YUI" value="${TOOLS_DIR}/yui-compressor/yuicompressor-2.4.2.jar" />
+    
+    <!-- Names for output -->
+    <property name="JS" value="${DIST_DIR}/js/" />
+    <property name="JS_MIN" value="${DIST_DIR}/min/" />
+	
+	<target name="doc" description="generates documentation for VIE^2">
+        <!-- jsdoc-toolkit ant taks is currently broken, so we directly run -->
+        <echo message="Generating Documentation:"/>
+        <java jar="${JSDOC_TOOLKIT_DIR}/jsrun.jar" fork="true" failonerror="true">
+            <arg value="${JSDOC_TOOLKIT_DIR}/app/run.js"/>
+            <arg value="-t=${JSDOC_TOOLKIT_DIR}/templates/jsdoc"/>
+            <arg value="-d=${DOCS_DIR}"/>
+            <arg value="${SRC_DIR}/core/core.js"/>
+            <arg value="${SRC_DIR}/core/connector.js"/>
+            <arg value="${SRC_DIR}/core/dsm.js"/>
+        </java>
+    </target>
+	
+	<target name="clean" description="Tidy up project.">
+        <echo message="Deleting distribution and API documentation"/>
+        <delete dir="${DIST_DIR}"/>
+        <delete dir="${DOCS_DIR}"/>
+    </target>
+	
+	<target name="init" depends="clean">
+	        <mkdir dir="${DIST_DIR}" />
+	        <mkdir dir="${JS}" />
+	        <mkdir dir="${JS_MIN}" />
+	</target>
+	
+    <target name="all" depends="init, doc, dist"/>
+	
+    <target name="dist">
+        <antcall target="combine" />
+        <antcall target="minimise" />
+        
+        <zip destfile="${DIST_DIR}/vie2-${VERSION}.zip">
+            <zipfileset dir="${JS}" includes="*.js" prefix="${JS}"/>
+            <zipfileset dir="${JS_MIN}" includes="*.js" prefix="${JS_MIN}"/>
+            <zipfileset dir="${DOCS_DIR}" includes="**/**" prefix="${DOCS_DIR}"/>
+        </zip>
+    </target>
+    
+    <target name="combine" description="combines .js files into one file">
+        <echo message="Building VIE2 Distribution" />
+        <concat destfile="${JS}/vie2-${VERSION}.js">
+        	<fileset dir="${SRC_DIR}" includes="core.js"/>
+       	</concat>
+    </target>
+
+    <target name="minimise">
+        <echo message="Minimising VIE^2" />
+
+        <antcall target="minimiseJSFile">
+            <param name="inputFile" value="${JS}/vie2-${VERSION}.js" />
+            <param name="outputFile" value="${JS_MIN}/vie2-${VERSION}.min.js" />
+        </antcall>
+    </target>
+
+    <target name="minimiseJSFile">
+        <java jar="${YUI}" fork="true" failonerror="true">
+            <arg line="--type js" />
+            <arg line="-o ${outputFile}" />
+            <arg value="${inputFile}" />
+        </java>
+    </target>
+    
+</project>

@@ -1,0 +1,65 @@
+<html
+	xmlns:foaf="http://xmlns.com/foaf/0.1/">
+	<head>
+		<title>Title</title>
+		
+		<!-- 3rd-party libs -->
+		<script type="text/javascript" src="../lib/jquery/1.4/jquery-1.4.4.min.js"></script>
+		<script type="text/javascript" src="../lib/jquery-ui/1.8/js/jquery.ui.widget.js"></script>
+		<script type="text/javascript" src="../lib/rdfquery/latest/jquery.rdfquery.all.min.js"></script>
+		<script type="text/javascript" src="../lib/underscoreJS/underscore.js"></script>
+		<script type="text/javascript" src="../lib/backboneJS/backbone.js"></script>
+		
+		<!-- VIE^2 -->
+		<script type="text/javascript" src="../src/core.js"></script>
+		<script type="text/javascript" src="../src/connector.js"></script>
+		<script type="text/javascript" src="../src/entity.js"></script>
+		<script type="text/javascript" src="../src/mapping.js"></script>
+		
+		<!-- Connector plug-ins -->
+		<script type="text/javascript" src="../src/connector-stanbol.js"></script>
+		<script type="text/javascript" src="../src/connector-rdfa.js"></script>
+		
+		<!-- Mapping plug-ins -->
+		<script type="text/javascript" src="../src/mapping-person.js"></script>
+		
+		<!-- How the API would look like! -->
+		<script type="text/javascript">
+			$(function () {
+				var span = $('#test')
+				.vie2()
+				.vie2('analyze', false);
+				
+				var matches = span
+				.vie2('filter', 'person')
+				.vie2('matches');
+				
+				jQuery.each(matches, function () {
+					console.info("FOUND PERSON: " + this.get('name') + "|" + this.get('uri'));
+				});
+			});
+			
+			/**
+			 * This outputs the following on the console:
+			 * 
+				VIE2.core Registered connector 'stanbol'
+				VIE2.core Registered connector 'rdfa'
+				VIE2.core Registered mapping 'person'
+				VIE2.core Start analyze!
+				VIE2.core Starting analysis with connector: 'stanbol'!
+				VIE2.core Received RDF annotation from connector 'stanbol'!
+				VIE2.core Starting analysis with connector: 'rdfa'!
+				VIE2.Connector(rdfa) Object has no 'typeof' attribute! Trying to find children.
+				VIE2.core Received RDF annotation from connector 'rdfa'!
+				VIE2.core Finished task: 'analyze'!
+				FOUND PERSON: "Michael Jackson"^^<http://www.w3.org/2001/XMLSchema#string>|<urn:enhancement-bbb47378-5ce3-d110-4e81-21660a7f41f4>
+				FOUND PERSON: "Barack Obama"^^<http://www.w3.org/2001/XMLSchema#string>|<urn:enhancement-1c79376c-15b7-f6c6-4756-17c4a9db061c>
+				FOUND PERSON: "Sebastian Germesin"|_:b279
+			 */
+		</script>
+		
+	</head>
+	<body>
+		<span id='test'>This is a small test, where <span typeof="foaf:Person"><span property="foaf:name">Sebastian Germesin</span></span>, Michael Jackson and Barack Obama sing a song.</span>
+	</body>
+</html>
