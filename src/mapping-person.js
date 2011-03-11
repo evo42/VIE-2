@@ -7,7 +7,7 @@ var mappingPerson = new Mapping('person');
 
 mappingPerson.connectorMappers = {};
 
-mappingPerson.filter = function (context, matches) {
+mappingPerson.filter = function (vie2, context, matches) {
 	var persons = [];
 	$.each(context, function (connectorId, rdf) {
 		var mapper = mappingPerson.connectorMappers[connectorId];

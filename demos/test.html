@@ -10,6 +10,9 @@
 		<script type="text/javascript" src="../lib/underscoreJS/underscore.js"></script>
 		<script type="text/javascript" src="../lib/backboneJS/backbone.js"></script>
 		
+		<!-- VIE -->
+		<script type="text/javascript" src="../lib/vie/vie.js"></script>
+		
 		<!-- VIE^2 -->
 		<script type="text/javascript" src="../src/core.js"></script>
 		<script type="text/javascript" src="../src/connector.js"></script>
@@ -21,21 +24,36 @@
 		<script type="text/javascript" src="../src/connector-rdfa.js"></script>
 		
 		<!-- Mapping plug-ins -->
-		<script type="text/javascript" src="../src/mapping-person.js"></script>
+		<script type="text/javascript" src="../src/mapping-entity.js"></script>
 		
 		<!-- How the API would look like! -->
 		<script type="text/javascript">
 			$(function () {
+				var ns = {
+					'google' : 'http://dbpedia.org/resource/',
+					'dbpedia' : 'http://dbpedia.org/resource/',
+					'dbprop' : 'http://dbpedia.org/property/',
+					'dbonto' : 'http://dbpedia.org/ontology/',
+					'rdf' : 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+					'rdfs' : 'http://www.w3.org/2000/01/rdf-schema#',
+					'iks' : 'http://www.iks-project.eu/#',
+					'foaf' : 'http://xmlns.com/foaf/0.1/',
+					'dc' : 'http://purl.org/dc/terms/',
+					'geo' : 'http://www.w3.org/2003/01/geo/wgs84_pos#'
+				};
+				
 				var span = $('#test')
-				.vie2()
+				.vie2({namespaces: ns})
 				.vie2('analyze', false);
 				
 				var matches = span
-				.vie2('filter', 'person')
+				.vie2('filter', 'entity')
 				.vie2('matches');
 				
+				console.info(matches);
+				
 				jQuery.each(matches, function () {
-					console.info("FOUND PERSON: " + this.get('name') + "|" + this.get('uri'));
+					console.info("FOUND PERSON: " + this['@'] + "|" + this['a']);
 				});
 			});
 			

@@ -3,10 +3,17 @@
  * @author <a href="mailto:sebastian.germesin@dfki.de">Sebastian Germesin</a>
  */
 
-var RDFEntity = Backbone.Model.extend({
+var JSONLDEntity = function (namespaces, uri, type, properties) {
 	
-	'id' : undefined,
-	'rdf:type' : [],
-	'prefixes' : {}
-
-});
+	var jsonld =  {
+		  "#": namespaces,
+		  "@": uri,
+		   "a": type
+	};
+	
+	for (var key in properties) {
+		jsonld[key] = properties[key]; 
+	}
+	
+	return jsonld;
+};

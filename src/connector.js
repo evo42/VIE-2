@@ -13,6 +13,10 @@ Connector = function(id, options) {
 
 Connector.prototype.init = function() {};
 
-Connector.prototype.analyze = function (object, callback) {};
+Connector.prototype.analyze = function (object, callback) {
+	$.VIE2.log("info", "VIE^2.Connector(" + this.id + ")", "Not implemented: analyze();");
+};
 
-Connector.prototype.query = function (uri, context) {};
+Connector.prototype.query = function (uri, context) {
+	$.VIE2.log("info", "VIE^2.Connector(" + this.id + ")", "Not implemented: query();");
+};

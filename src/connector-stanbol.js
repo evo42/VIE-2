@@ -9,7 +9,7 @@ var stanbolConnector = new Connector('stanbol', {
 	"entityhub_url" : "http://stanbol.iksfordrupal.net:9000/entityhub/"
 });
 
-stanbolConnector.analyze = function (object, callback) {
+stanbolConnector.analyze = function (object, namespaces, callback) {
 	if (object == undefined) {
 		jQuery.VIE2.log ("warn", "VIE2.Connector('" + this.id + "')", "Given object is undefined!");
 		return;

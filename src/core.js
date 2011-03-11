@@ -17,13 +17,54 @@
 	 * You can call .vie2() on every jQuery object.
 	 */
     $.widget('VIE2.vie2', {
+    	
+    	// default options
+    	options: {
+    		/**
+    		 * namespaces to be used!
+    		 */
+    		namespaces: {},
+    		//////////// EVENTS /////////////
+    		/**
+    		 * ready: called as soon as the object is ready (after _create)
+    		 */
+    		ready: jQuery.noop,
+    		/**
+    		 * contextchanged: TODO:
+    		 */
+    		contextchanged: jQuery.noop,
+    		/**
+    		 * urischanged: TODO:
+    		 */
+    		urischanged: jQuery.noop
+    	},
 
-    	_context: {},
-
-    	_oldMatches: [],
-    	_matches: [],
+    	/**
+		 * TODO:
+		 */
+		_cache: {},
+		
+		/**
+		 *  TODO:
+		 */
+		_matches: [],
+		
+		/**
+		 *  TODO:
+		 */
+		_oldMatches: [],
+    	
+    	_create: function() {
+			jQuery.VIE2.log("info", "VIE2.core", "Start " + this.element);
+			this._trigger("ready", this, {});
+			jQuery.VIE2.log("info", "VIE2.core", "End " + this.element);
+		},
     	
     	/**
+		 * options:
+		 * async: true, false
+		 */
+		/**
 		 * options:
 		 * async: true, false
 		 */
@@ -35,14 +76,18 @@
 				jQuery.VIE2.log("info", "VIE2.core", "Starting analysis with connector: '" + this.id + "'!");
 				var callback = function (conn) {
 					return function (rdf) {
-						that._context[conn.id] = rdf;
+						jQuery.each(that.options.namespaces, function(k, v) {
+							rdf.prefix(k, v);
+						});
+						that._cache[conn.id] = rdf;
+						that._trigger('contextchanged', conn, {'rdf': rdf});
 						jQuery.VIE2.log("info", "VIE2.core", "Received RDF annotation from connector '" + conn.id + "'!");
 					};
 				}(this);
 				if (async) {
-					window.setTimeout(this.analyze(elem, callback), 0); // execute the analysis in an own thread
+					window.setTimeout(this.analyze(elem, that.options.namespaces, callback), 0); // execute the analysis in an own thread
 				} else {
-					this.analyze(elem, callback);
+					this.analyze(elem, that.options.namespaces, callback);
 				}
 			});
 			jQuery.VIE2.log("info", "VIE2.core", "Finished task: 'analyze'!");
@@ -50,28 +95,63 @@
 			return this;
 		},
 		
-		filter: function (type) {
-
-			this._oldMatches = this._matches;
-			this._matches = [];
-			var that = this;
-			
-			jQuery.each(jQuery.VIE2.mappings, function () {
-				if (this.id === type) {
-					jQuery.merge(that._matches, this.filter(that._context, that._oldMatches));
-					return false;
-				}
-			});
+		filter: function (filterId) {
+			if (filterId === undefined) {
+				jQuery.VIE2.log("warn", "VIE2.core", "Invoked 'filter' with undefined argument!");
+			} else if (typeof filterId === 'string') {
+				var that = this;
+				this._oldMatches = this._matches;
+				this._matches = [];
+				$.each (jQuery.VIE2.mappings, function () {
+					if (this.id === filterId) {
+						jQuery.VIE2.log("info", "VIE2.core", "Invoking DSF '" + this.id + "'!");
+						jQuery.merge(that._matches, this.filter(that, that._cache, that._oldMatches));
+					}
+				});
+			} else {
+				jQuery.VIE2.log("warn", "VIE2.core", "Invoked 'filter' with wrong argument: '" + filterId + "'!");
+			}
 			return this;
-		}, 
+		},
 		
-		undo: function () {
-			this._matches = this._oldMatches;
-			this._oldMatches = [];
+		query: function (uri, props) {
+			var ret = {};
+			if (uri === undefined) {
+				jQuery.VIE2.log("warn", "VIE2.core", "Invoked 'query' with undefined argument!");
+			}
+			if (uri instanceof jQuery.rdf.resource &&
+					uri.type === 'uri') {
+				var that = this;
+
+				jQuery.each(props, function () {
+					ret[this] = [];
+				});
+
+				jQuery.each(jQuery.VIE2.connectors, function () {
+					var retTmp = this.query(uri, props);
+					if (retTmp) {
+						jQuery.extend(ret, retTmp);
+					}
+
+				});
+			}
+			return ret;
 		},
 		
 		matches: function () {
 			return this._matches;
+		},
+		
+		undo: function () {
+			this._matches = this._oldMatches;
+			this._oldMatches = [];
+			return this;
+		},
+		
+		clear: function () {
+			this._matches = [];
+			this._oldMatches = [];
+			return this;
 		}
 		
 	});
@@ -117,7 +197,7 @@ jQuery.VIE2.unregisterConnector = function (connector) {
 		//TODO: untested code!
 		if (this.id === connector.id) {
 			//TODO: array slice
-			jQuery.Aviate.log("info", "VIE2.core", "De-registered connector '" + connector.id + "'");
+			jQuery.VIE2.log("info", "VIE2.core", "De-registered connector '" + connector.id + "'");
 			return;
 		}
 	});
@@ -149,7 +229,7 @@ jQuery.VIE2.unregisterMapping = function (mapping) {
 		//TODO: untested code!
 		if (this.id === mapping.id) {
 			//TODO: array slice
-			jQuery.Aviate.log("info", "VIE2.core", "De-registered mapping '" + mapping.id + "'");
+			jQuery.VIE2.log("info", "VIE2.core", "De-registered mapping '" + mapping.id + "'");
 			return;
 		}
 	});
